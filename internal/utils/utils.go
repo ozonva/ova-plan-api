@@ -1,10 +1,11 @@
 package utils
 
-import "errors"
+import (
+	"errors"
+)
 
 // ReverseMap reverse sting->int map to int->string map.
 // If input map has one or more same values function calls panic.
-// input map must be initialized.
 func ReverseMap(input map[string]int) (map[int]string, error) {
 	if input == nil {
 		return nil, errors.New("uninitialized map passed")
@@ -20,4 +21,27 @@ func ReverseMap(input map[string]int) (map[int]string, error) {
 	}
 
 	return resultMap, nil
+}
+
+// SplitSlice splits slice to several batches with size equals batchSize (except last)
+func SplitSlice(input []int, batchSize int) ([][]int, error) {
+	if input == nil {
+		return nil, errors.New("uninitialized slice passed")
+	}
+
+	if batchSize < 1 {
+		return nil, errors.New("batchSize must be greater than 0")
+	}
+
+	var batched [][]int
+
+	for i := 0; i < len(input); i += batchSize {
+		rightBound := i + batchSize
+
+		if rightBound > len(input) {
+			rightBound = len(input)
+		}
+		batched = append(batched, input[i:rightBound])
+	}
+	return batched, nil
 }

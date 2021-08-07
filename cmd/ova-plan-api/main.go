@@ -14,18 +14,23 @@ func main() {
 
 func demoUtils() {
 	demoReverse()
+	demoBatching()
 }
 
 func demoReverse() {
 	strToIntMap := map[string]int{"key1": 1, "key2": 2, "key3": 3}
-	fmt.Println("Before reversing:")
-	pp.Println(strToIntMap)
+	pp.Printf("Before reverse: %v \n", strToIntMap)
 
-	reversed, err := utils.ReverseMap(strToIntMap)
-	if err != nil {
-		return
-	}
+	reversed, _ := utils.ReverseMap(strToIntMap)
 
-	fmt.Println("After reverse:")
-	pp.Println(reversed)
+	pp.Printf("After reverse: %v \n", reversed)
+}
+
+func demoBatching() {
+	slice := []int{1, 2, 3, 4, 5}
+	pp.Printf("Before batching: %v \n", slice)
+
+	batched, _ := utils.SplitSlice(slice, 2)
+
+	pp.Printf("Before batching: %v \n", batched)
 }
