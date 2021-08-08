@@ -19,6 +19,8 @@ func TestSplitSlice(t *testing.T) {
 		{[]int{1, 2, 3}, 0, nil, errors.New("batchSize must be greater than 0")},
 		{[]int{1, 2}, 3, [][]int{{1, 2}}, nil},
 		{[]int{1, 2, 3}, 2, [][]int{{1, 2}, {3}}, nil},
+		{[]int{}, 2, [][]int{}, nil},
+		{nil, 1, nil, nil},
 	}
 
 	for _, table := range tables {

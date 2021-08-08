@@ -12,7 +12,8 @@ func SplitSlice(input []int, batchSize int) ([][]int, error) {
 		return nil, errors.New("batchSize must be greater than 0")
 	}
 
-	var batched [][]int
+	batchedCapacity := len(input)%batchSize + 1
+	batched := make([][]int, 0, batchedCapacity)
 
 	for i := 0; i < len(input); i += batchSize {
 		rightBound := i + batchSize
