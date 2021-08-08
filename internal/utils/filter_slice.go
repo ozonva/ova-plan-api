@@ -8,7 +8,7 @@ func FilterSlice(input []int, valuesToDelete []int) []int {
 	if input == nil {
 		return nil
 	}
-	var result []int
+	result := make([]int, 0)
 	if valuesToDelete == nil || len(valuesToDelete) == 0 {
 		copy(result, input)
 		return input

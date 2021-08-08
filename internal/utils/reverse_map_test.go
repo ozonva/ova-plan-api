@@ -20,7 +20,7 @@ func TestReverseMap(t *testing.T) {
 		result := ReverseMap(table.input)
 		t.Logf("Testing Input: %v", table.input)
 		if !reflect.DeepEqual(table.expected, result) {
-			t.Errorf("Wrong result! Actual is %v but %v expected", result, table.expected)
+			t.Errorf("\tWrong result! Actual is %v but %v expected", result, table.expected)
 		}
 	}
 }
