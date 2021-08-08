@@ -6,9 +6,9 @@ import (
 
 // ReverseMap reverse sting->int map to int->string map.
 // If input map has one or more same values function calls panic.
-func ReverseMap(input map[string]int) (map[int]string, error) {
+func ReverseMap(input map[string]int) map[int]string {
 	if input == nil {
-		return nil, errors.New("uninitialized map passed")
+		return nil
 	}
 
 	resultMap := make(map[int]string, len(input))
@@ -20,13 +20,13 @@ func ReverseMap(input map[string]int) (map[int]string, error) {
 		resultMap[value] = key
 	}
 
-	return resultMap, nil
+	return resultMap
 }
 
 // SplitSlice splits slice to several batches with size equals batchSize (except last)
 func SplitSlice(input []int, batchSize int) ([][]int, error) {
 	if input == nil {
-		return nil, errors.New("uninitialized slice passed")
+		return nil, nil
 	}
 
 	if batchSize < 1 {
@@ -44,4 +44,34 @@ func SplitSlice(input []int, batchSize int) ([][]int, error) {
 		batched = append(batched, input[i:rightBound])
 	}
 	return batched, nil
+}
+
+// FilterSlice creates new slice with elements from input without elements from valuesToDelete
+func FilterSlice(input []int, valuesToDelete []int) []int {
+	if input == nil {
+		return nil
+	}
+
+	var result []int
+
+	if valuesToDelete == nil || len(valuesToDelete) == 0 {
+		copy(result, input)
+		return input
+	}
+
+	type void struct{}
+	var voidValue void
+
+	setToDelete := make(map[int]void)
+	for _, val := range valuesToDelete {
+		setToDelete[val] = voidValue
+	}
+
+	for _, val := range input {
+		if _, exists := setToDelete[val]; !exists {
+			result = append(result, val)
+		}
+	}
+
+	return result
 }
