@@ -36,8 +36,8 @@ func demoBatching() {
 }
 
 func demoFilter() {
-	slice := []int{1, 2, 3, 4, 5}
-	toDelete := []int{1, 2, 3}
+	slice := []int{1, 2, 2, 3, 3, 4, 5}
+	toDelete := []int{0, 1, 2, 3}
 	fmt.Printf("Before filtering: %v \n"+
 		"Values to delete: %v \n", slice, toDelete)
 
