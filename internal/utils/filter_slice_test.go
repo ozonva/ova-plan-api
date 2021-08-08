@@ -20,8 +20,8 @@ func TestFilterSlice(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		result := FilterSlice(table.inputSlice, table.inputToDelete)
 		t.Logf("input: %v %v", table.inputSlice, table.inputToDelete)
+		result := FilterSlice(table.inputSlice, table.inputToDelete)
 		if !reflect.DeepEqual(table.expected, result) {
 			t.Errorf("\tWrong result! Actual is %v but %v expected", result, table.expected)
 		}
