@@ -16,7 +16,7 @@ func demoReverse() {
 	strToIntMap := map[string]int{"key1": 1, "key2": 2, "key3": 3}
 	pp.Printf("Before reverse: %v \n", strToIntMap)
 
-	reversed := utils.ReverseMap(strToIntMap)
+	reversed, _ := utils.ReverseMap(strToIntMap)
 
 	pp.Printf("After reverse: %v \n\n", reversed)
 }

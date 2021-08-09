@@ -1,8 +1,5 @@
 package utils
 
-type void struct{}
-type intSet = map[int]void
-
 // FilterSlice creates new slice with elements from input without elements from valuesToDelete
 func FilterSlice(input []int, valuesToDelete []int) []int {
 	if input == nil {
@@ -25,12 +22,10 @@ func FilterSlice(input []int, valuesToDelete []int) []int {
 	return result
 }
 
-func sliceToSet(slice []int) intSet {
-	var voidValue void
-
-	set := make(intSet)
+func sliceToSet(slice []int) map[int]struct{} {
+	set := make(map[int]struct{})
 	for _, val := range slice {
-		set[val] = voidValue
+		set[val] = struct{}{}
 	}
 
 	return set
