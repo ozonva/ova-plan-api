@@ -26,7 +26,7 @@ func demoBatching() {
 	slice := []int{1, 2, 3, 4, 5}
 	fmt.Printf("Before batching: %v \n", slice)
 
-	batched, _ := utils.SplitSlice(slice, 2)
+	batched, _ := utils.SplitSliceInt(slice, 2)
 
 	fmt.Printf("Before batching: %v \n\n", batched)
 }

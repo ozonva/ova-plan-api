@@ -44,7 +44,7 @@ func TestReadFile(t *testing.T) {
 	for _, table := range tables {
 		err := ReadFile(table.info.name, table.callback)
 		if table.expectedErr == nil {
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 		} else {
 			assert.True(t, errors.Is(err, table.expectedErr))
 		}
@@ -70,8 +70,9 @@ func TestReadFiles(t *testing.T) {
 	for _, table := range tables {
 		dataSlice = make([]byte, 0)
 		err := ReadFiles(table.callback, table.fileNames...)
+
 		if table.expectedErr == nil {
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 		} else {
 			assert.True(t, errors.Is(err, table.expectedErr))
 		}
