@@ -3,12 +3,20 @@ package utils
 import (
 	"fmt"
 	utils "github.com/ozonva/ova-plan-api/internal/utils/errors"
-	"os"
+	"github.com/spf13/afero"
+	"io"
 )
 
-type ReadFileCallback func(file *os.File) error
+type SimpleFileHandler interface {
+	io.Reader
+	Name() string
+}
 
-func closeFile(file *os.File) {
+type ReadFileCallback func(file SimpleFileHandler) error
+
+var AppFs = afero.NewOsFs()
+
+func closeFile(file io.Closer) {
 	err := file.Close()
 	if err != nil {
 		panic(err)
@@ -26,7 +34,7 @@ func ReadFiles(callback ReadFileCallback, paths ...string) error {
 }
 
 func ReadFile(path string, callback ReadFileCallback) error {
-	file, err := os.Open(path)
+	file, err := AppFs.Open(path)
 	if err != nil {
 		return utils.NewReadFileError(path, err)
 	}

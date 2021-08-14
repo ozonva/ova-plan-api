@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/k0kubun/pp"
 	"github.com/ozonva/ova-plan-api/internal/utils"
-	"os"
 )
 
 func demoUtils() {
@@ -49,7 +48,7 @@ func demoReadFile() {
 	}
 }
 
-func printFileContent(file *os.File) error {
+func printFileContent(file utils.SimpleFileHandler) error {
 	fmt.Printf("Start reading %v\n", file.Name())
 	scanner := bufio.NewScanner(file)
 
