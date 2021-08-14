@@ -1,10 +1,8 @@
 package main
 
-import (
-	"fmt"
-)
-
 func main() {
-	fmt.Println("Hello there!")
-	demoUtils()
+	// TODO: Use args for different demo
+	//demoUtils()
+
+	demoReadFile()
 }
