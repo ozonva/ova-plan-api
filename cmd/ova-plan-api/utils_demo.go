@@ -11,6 +11,7 @@ func demoUtils() {
 	demoReverse()
 	demoBatching()
 	demoFilter()
+	demoReadFile()
 }
 
 func demoReverse() {

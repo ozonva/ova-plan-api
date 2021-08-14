@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-type PlanInterface interface {
-	String()
-}
-
 type Plan struct {
 	Id          uint64
 	UserId      uint64
@@ -16,10 +12,6 @@ type Plan struct {
 	Description string
 	CreatedAt   time.Time
 	DeadlineAt  time.Time
-}
-
-func (p Plan) String() {
-	panic("implement me")
 }
 
 func NewPlan(id uint64, userId uint64, title string, description string, createdAt time.Time, deadlineAt time.Time) *Plan {
