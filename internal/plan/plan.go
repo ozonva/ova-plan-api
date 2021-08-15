@@ -18,7 +18,7 @@ func NewPlan(id uint64, userId uint64, title string, description string, created
 	return &Plan{Id: id, UserId: userId, Title: title, Description: description, CreatedAt: createdAt, DeadlineAt: deadlineAt}
 }
 
-func String(p Plan) string {
+func (p Plan) String() string {
 	bytes, err := json.Marshal(p)
 	if err != nil {
 		panic(err)
