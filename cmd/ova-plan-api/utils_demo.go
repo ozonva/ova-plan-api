@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/k0kubun/pp"
 	"github.com/ozonva/ova-plan-api/internal/utils"
@@ -10,6 +11,7 @@ func demoUtils() {
 	demoReverse()
 	demoBatching()
 	demoFilter()
+	demoReadFile()
 }
 
 func demoReverse() {
@@ -25,7 +27,7 @@ func demoBatching() {
 	slice := []int{1, 2, 3, 4, 5}
 	fmt.Printf("Before batching: %v \n", slice)
 
-	batched, _ := utils.SplitSlice(slice, 2)
+	batched, _ := utils.SplitSliceInt(slice, 2)
 
 	fmt.Printf("Before batching: %v \n\n", batched)
 }
@@ -38,4 +40,24 @@ func demoFilter() {
 
 	filtered := utils.FilterSlice(slice, toDelete)
 	fmt.Printf("After filtering: %v \n\n", filtered)
+}
+
+func demoReadFile() {
+	err := utils.ReadFiles(printFileContent, "resources/default.config", "resources/custom.config")
+	if err != nil {
+		print(err.Error())
+	}
+}
+
+func printFileContent(file utils.SimpleFileHandler) error {
+	fmt.Printf("Start reading %v\n", file.Name())
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Print(err)
+	}
+	return nil
 }
