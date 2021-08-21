@@ -4,6 +4,7 @@ import (
 	"github.com/ozonva/ova-plan-api/internal/models"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/utils"
+	"log"
 )
 
 // Flusher - interface for saving plans into repo
@@ -32,6 +33,7 @@ func (f *flusher) Flush(plans []models.Plan) []models.Plan {
 	batched, err := utils.SplitSlicePlan(plans, f.chunkSize)
 
 	if err != nil {
+		log.Printf("Batching error: %v", err.Error())
 		return plans
 	}
 
@@ -40,6 +42,7 @@ func (f *flusher) Flush(plans []models.Plan) []models.Plan {
 	for _, batch := range batched {
 		err := f.planRepo.AddEntities(batch)
 		if err != nil {
+			log.Printf("Batch saving error, skip batch. %v", err)
 			failed = append(failed, batch...)
 		}
 	}
@@ -47,5 +50,7 @@ func (f *flusher) Flush(plans []models.Plan) []models.Plan {
 	if len(failed) == 0 {
 		return nil
 	}
+
+	log.Printf("Some entities has not saved: %v", failed)
 	return failed
 }
