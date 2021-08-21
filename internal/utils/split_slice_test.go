@@ -2,7 +2,7 @@ package utils
 
 import (
 	"errors"
-	"github.com/ozonva/ova-plan-api/internal/plan"
+	"github.com/ozonva/ova-plan-api/internal/models"
 	"reflect"
 	"testing"
 	"time"
@@ -39,26 +39,26 @@ func TestSplitSliceInt(t *testing.T) {
 }
 
 func TestSplitSlicePlan(t *testing.T) {
-	plans := []plan.Plan{
-		*plan.NewPlan(0, 123, "Сдать задание 3", "Оно ждёт", time.Now(), time.Date(2021, 8, 16, 0, 0, 0, 0, time.UTC)),
-		*plan.NewPlan(2, 123, "Пройти курс до конца", "", time.Now(), time.Date(2021, 9, 17, 0, 0, 0, 0, time.UTC)),
-		*plan.NewPlan(3, 123, "Съездить на море", "Красивое", time.Now(), time.Date(2022, 7, 9, 0, 0, 0, 0, time.UTC)),
-		*plan.NewPlan(3, 123, "Научиться рисовать акварелью", "Сложно", time.Now(), time.Date(2023, 7, 9, 0, 0, 0, 0, time.UTC)),
+	plans := []models.Plan{
+		*models.NewPlan(0, 123, "Сдать задание 3", "Оно ждёт", time.Now(), time.Date(2021, 8, 16, 0, 0, 0, 0, time.UTC)),
+		*models.NewPlan(2, 123, "Пройти курс до конца", "", time.Now(), time.Date(2021, 9, 17, 0, 0, 0, 0, time.UTC)),
+		*models.NewPlan(3, 123, "Съездить на море", "Красивое", time.Now(), time.Date(2022, 7, 9, 0, 0, 0, 0, time.UTC)),
+		*models.NewPlan(3, 123, "Научиться рисовать акварелью", "Сложно", time.Now(), time.Date(2023, 7, 9, 0, 0, 0, 0, time.UTC)),
 	}
 
 	tables := []struct {
-		inputSlice     []plan.Plan
+		inputSlice     []models.Plan
 		inputBatchSize int
-		expected       [][]plan.Plan
+		expected       [][]models.Plan
 		expectedErr    error
 	}{
-		{[]plan.Plan{plans[0], plans[1], plans[2], plans[3]}, 2, [][]plan.Plan{{plans[0], plans[1]}, {plans[2], plans[3]}}, nil},
-		{[]plan.Plan{plans[0], plans[1], plans[2]}, 1, [][]plan.Plan{{plans[0]}, {plans[1]}, {plans[2]}}, nil},
-		{[]plan.Plan{plans[0], plans[1], plans[2]}, 3, [][]plan.Plan{{plans[0], plans[1], plans[2]}}, nil},
-		{[]plan.Plan{plans[0], plans[1], plans[2]}, 0, nil, errors.New("batchSize must be greater than 0")},
-		{[]plan.Plan{plans[0], plans[1]}, 3, [][]plan.Plan{{plans[0], plans[1]}}, nil},
-		{[]plan.Plan{plans[0], plans[1], plans[2]}, 2, [][]plan.Plan{{plans[0], plans[1]}, {plans[2]}}, nil},
-		{[]plan.Plan{}, 2, [][]plan.Plan{}, nil},
+		{[]models.Plan{plans[0], plans[1], plans[2], plans[3]}, 2, [][]models.Plan{{plans[0], plans[1]}, {plans[2], plans[3]}}, nil},
+		{[]models.Plan{plans[0], plans[1], plans[2]}, 1, [][]models.Plan{{plans[0]}, {plans[1]}, {plans[2]}}, nil},
+		{[]models.Plan{plans[0], plans[1], plans[2]}, 3, [][]models.Plan{{plans[0], plans[1], plans[2]}}, nil},
+		{[]models.Plan{plans[0], plans[1], plans[2]}, 0, nil, errors.New("batchSize must be greater than 0")},
+		{[]models.Plan{plans[0], plans[1]}, 3, [][]models.Plan{{plans[0], plans[1]}}, nil},
+		{[]models.Plan{plans[0], plans[1], plans[2]}, 2, [][]models.Plan{{plans[0], plans[1]}, {plans[2]}}, nil},
+		{[]models.Plan{}, 2, [][]models.Plan{}, nil},
 		{nil, 1, nil, nil},
 	}
 

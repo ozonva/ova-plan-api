@@ -2,7 +2,7 @@ package utils
 
 import (
 	"errors"
-	"github.com/ozonva/ova-plan-api/internal/plan"
+	"github.com/ozonva/ova-plan-api/internal/models"
 )
 
 // SplitSliceInt splits slice to several batches with size equals batchSize (except last)
@@ -29,7 +29,7 @@ func SplitSliceInt(input []int, batchSize int) ([][]int, error) {
 	return batched, nil
 }
 
-func SplitSlicePlan(input []plan.Plan, batchSize int) ([][]plan.Plan, error) {
+func SplitSlicePlan(input []models.Plan, batchSize int) ([][]models.Plan, error) {
 	if input == nil {
 		return nil, nil
 	}
@@ -39,7 +39,7 @@ func SplitSlicePlan(input []plan.Plan, batchSize int) ([][]plan.Plan, error) {
 	}
 
 	batchedCapacity := (len(input) + batchSize - 1) / batchSize
-	batched := make([][]plan.Plan, 0, batchedCapacity)
+	batched := make([][]models.Plan, 0, batchedCapacity)
 
 	for i := 0; i < len(input); i += batchSize {
 		rightBound := i + batchSize

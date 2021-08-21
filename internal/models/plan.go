@@ -1,4 +1,4 @@
-package plan
+package models
 
 import (
 	"encoding/json"
