@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	BufferIsFull = errors.New("entity buffer is full")
-	Terminated   = errors.New("saver is terminated")
+	BufferIsFull        = errors.New("entity buffer is full")
+	Terminated          = errors.New("saver is terminated")
+	NonPositiveArgument = errors.New("argument must be greater than zero")
 )
 
 type Saver interface {
@@ -20,25 +21,39 @@ type Saver interface {
 }
 
 // NewSaver returns Saver with periodical saving support.
-// Function starts goroutine which flushing entities added by Save function with flushInterval period
+//  it starts goroutine which flushing entities added by Save function with flushInterval period.
+//  For stop call Close method
 func NewSaver(
 	capacity uint,
 	flusher flusher.Flusher,
 	flushInterval time.Duration,
-) Saver {
+) (Saver, error) {
 	saver := &saver{
 		flusher:           flusher,
 		buffer:            make([]models.Plan, 0, capacity),
 		loopTerminateChan: make(chan struct{}),
+		Mutex:             &sync.Mutex{},
 	}
 
-	go flushLoop(saver, flushInterval)
-	return saver
+	if flushInterval < 1 {
+		return nil, fmt.Errorf("%w: flushInterval", NonPositiveArgument)
+	}
+
+	if capacity < 1 {
+		return nil, fmt.Errorf("%w: capacity", NonPositiveArgument)
+	}
+
+	//wg guarantees that goroutine has started before function return
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go flushLoop(saver, flushInterval, wg)
+	wg.Wait()
+
+	return saver, nil
 }
 
 type saver struct {
-	sync.Mutex
-	onceInit          sync.Once
+	*sync.Mutex
 	buffer            []models.Plan
 	loopTerminateChan chan struct{}
 	flusher           flusher.Flusher
@@ -54,6 +69,10 @@ func (s *saver) Save(entity models.Plan) error {
 	defer s.Unlock()
 
 	if len(s.buffer) == cap(s.buffer) {
+		s.flush()
+	}
+	// if there were errors while saving whole buffered elements
+	if len(s.buffer) == cap(s.buffer) {
 		return fmt.Errorf("%w. Unable to save plan with id %v", BufferIsFull, entity.Id)
 	}
 
@@ -61,14 +80,18 @@ func (s *saver) Save(entity models.Plan) error {
 	return nil
 }
 
-func flushLoop(s *saver, flushInterval time.Duration) {
+func flushLoop(s *saver, flushInterval time.Duration, wg *sync.WaitGroup) {
 	flushTicker := time.NewTicker(flushInterval)
+	wg.Done()
 	for {
 		select {
 		case <-flushTicker.C:
-			s.flush()
-		case <-s.loopTerminateChan:
-			return
+			s.flushWithLock()
+		case _, ok := <-s.loopTerminateChan:
+			if !ok {
+				flushTicker.Stop()
+				return
+			}
 		}
 	}
 }
@@ -79,19 +102,24 @@ func (s *saver) Close() error {
 		return fmt.Errorf("unable to close: %w", Terminated)
 	}
 
-	s.loopTerminateChan <- struct{}{}
-
-	s.terminated = true
-	s.flush()
-
 	close(s.loopTerminateChan)
+	s.terminated = true
+	s.flushWithLock()
+
 	return nil
 }
 
-func (s *saver) flush() {
+func (s *saver) flushWithLock() {
 	s.Lock()
 	defer s.Unlock()
 
+	s.flush()
+}
+
+func (s *saver) flush() {
+	if len(s.buffer) == 0 {
+		return
+	}
 	failed := s.flusher.Flush(s.buffer)
 	s.buffer = make([]models.Plan, 0, cap(s.buffer))
 	s.buffer = append(s.buffer, failed...)
