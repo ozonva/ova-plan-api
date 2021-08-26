@@ -104,7 +104,7 @@ var _ = Describe("Saver", func() {
 			flushInterval = time.Hour * 8800
 		})
 
-		FIt("Should flush entities on close", func() {
+		It("Should flush entities on close", func() {
 			defer GinkgoRecover()
 
 			mockFlusher.EXPECT().Flush(testData[:1]).Return(nil).Times(1)
