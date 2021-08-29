@@ -54,7 +54,7 @@ message ListPlansRequest {
 
 message ListPlansResponse {
   repeated Plan plans = 1;
-  bool hasMore = 2;
+  bool has_more = 2;
 }
 
 message RemovePlanRequest {

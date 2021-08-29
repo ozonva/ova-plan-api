@@ -14,7 +14,7 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// PlanApiClient is the client API for PlanApi controller.
+// PlanApiClient is the client API for PlanApi service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PlanApiClient interface {
@@ -97,7 +97,7 @@ func (UnimplementedPlanApiServer) RemovePlan(context.Context, *RemovePlanRequest
 }
 func (UnimplementedPlanApiServer) mustEmbedUnimplementedPlanApiServer() {}
 
-// UnsafePlanApiServer may be embedded to opt out of forward compatibility for this controller.
+// UnsafePlanApiServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to PlanApiServer will
 // result in compilation errors.
 type UnsafePlanApiServer interface {
@@ -180,7 +180,7 @@ func _PlanApi_RemovePlan_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-// PlanApi_ServiceDesc is the grpc.ServiceDesc for PlanApi controller.
+// PlanApi_ServiceDesc is the grpc.ServiceDesc for PlanApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PlanApi_ServiceDesc = grpc.ServiceDesc{
