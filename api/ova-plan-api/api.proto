@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package ova.plan.api;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ozonva/ova-plan-api/pkg/ova-plan-api;ova_plan_api";
+
+service PlanApi {
+  rpc CreatePlan(CreatePlanRequest) returns (CreatePlanResponse) {}
+  rpc DescribePlan(DescribePlanRequest) returns (DescribePlanResponse) {}
+  rpc ListPlans(ListPlansRequest) returns (ListPlansResponse) {}
+  rpc RemovePlan(RemovePlanRequest) returns (RemovePlanResponse) {}
+}
+
+message Plan {
+  uint64 plan_id = 1;
+  uint64 user_id = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp deadline_at = 6;
+}
+
+message PlanTemplate {
+  uint64 user_id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp deadline_at = 4;
+}
+
+message CreatePlanRequest {
+  PlanTemplate plan = 1;
+}
+
+message CreatePlanResponse {
+  uint64 plan_id = 1;
+}
+
+message DescribePlanRequest {
+  uint64 plan_id = 1;
+}
+
+message DescribePlanResponse {
+  Plan plan = 1;
+}
+
+message ListPlansRequest {
+  optional google.protobuf.Timestamp created_from = 1;
+  optional google.protobuf.Timestamp created_to = 2;
+  optional uint64 limit = 3;
+  optional uint64 offset = 4;
+}
+
+message ListPlansResponse {
+  repeated Plan plans = 1;
+  bool has_more = 2;
+}
+
+message RemovePlanRequest {
+  uint64 plan_id = 1;
+}
+
+message RemovePlanResponse {
+  string error = 1;
+}
