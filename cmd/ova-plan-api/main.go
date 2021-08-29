@@ -1,5 +1,13 @@
 package main
 
+import "github.com/ozonva/ova-plan-api/internal/server"
+
 func main() {
-	demoUtils()
+	srv := server.New()
+
+	err := srv.Run(":8080")
+	if err != nil {
+		return
+	}
+
 }
