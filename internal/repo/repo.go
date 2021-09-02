@@ -12,6 +12,7 @@ type PlanRepo interface {
 	AddEntities(entities []models.Plan) error
 	ListEntities(limit, offset uint64) ([]models.Plan, error)
 	DescribeEntity(entityId uint64) (*models.Plan, error)
+	RemoveEntity(entityId uint64) error
 }
 
 type planRepo struct {
@@ -43,6 +44,10 @@ func (p *planRepo) ListEntities(limit, offset uint64) ([]models.Plan, error) {
 }
 
 func (p *planRepo) DescribeEntity(entityId uint64) (*models.Plan, error) {
+	panic("implement me")
+}
+
+func (p *planRepo) RemoveEntity(entityId uint64) error {
 	panic("implement me")
 }
 
