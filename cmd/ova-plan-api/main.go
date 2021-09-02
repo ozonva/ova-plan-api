@@ -1,17 +1,19 @@
 package main
 
 import (
+	"github.com/ozonva/ova-plan-api/internal/config"
 	database "github.com/ozonva/ova-plan-api/internal/db"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/server"
 	"github.com/ozonva/ova-plan-api/internal/service"
+	"log"
 )
 
 func main() {
-	//TODO: To config
-	db, err := database.Connect("postgresql://ova_plan:ova_plan@127.0.0.1:5432/ova_plan_db?sslmode=disable")
+	dbConfig := config.NewEnvVarDatabaseConfig()
+	db, err := database.Connect(dbConfig)
 	if err != nil {
-		panic("Database connect failed") // TODO
+		log.Fatalf("Database connect failed, %v", err.Error())
 	}
 	defer db.Close()
 
@@ -21,6 +23,6 @@ func main() {
 
 	err = grpcServer.Run(":8080")
 	if err != nil {
-		panic("Grpc start failed") // TODO
+		log.Fatalf("Grpc start failed, %v", err.Error())
 	}
 }
