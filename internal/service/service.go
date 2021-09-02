@@ -72,6 +72,9 @@ func (s *planApiService) ListPlans(ctx context.Context, request *api.ListPlansRe
 
 	protoPlans := make([]*api.Plan, 0, len(plans))
 	for _, plan := range plans {
+		if len(protoPlans) == int(request.GetLimit()) {
+			break
+		}
 		protoPlans = append(protoPlans, mapPlanToProto(&plan))
 	}
 
@@ -89,10 +92,10 @@ func (s *planApiService) RemovePlan(ctx context.Context, request *api.RemovePlan
 
 	err := s.planRepo.RemoveEntity(request.PlanId)
 	if err != nil {
-		return nil, err
+		return &api.RemovePlanResponse{Error: err.Error()}, nil
 	}
 
-	return &api.RemovePlanResponse{Error: err.Error()}, nil
+	return &api.RemovePlanResponse{}, nil
 }
 
 func mapPlanToProto(plan *models.Plan) *api.Plan {
