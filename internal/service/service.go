@@ -57,16 +57,6 @@ func (s *planApiService) MultiCreatePlan(ctx context.Context, request *api.Multi
 	return &api.MultiCreatePlanResponse{}, nil
 }
 
-func newPlan(planTemplate *api.PlanTemplate) *models.Plan {
-	return models.NewPlan(
-		0,
-		planTemplate.UserId,
-		planTemplate.Title,
-		planTemplate.Description,
-		time.Now(),
-		planTemplate.DeadlineAt.AsTime())
-}
-
 func (s *planApiService) DescribePlan(ctx context.Context, request *api.DescribePlanRequest) (*api.DescribePlanResponse, error) {
 	span := opentracing.StartSpan("DescribePlan rpc")
 	defer span.Finish()
@@ -138,6 +128,22 @@ func (s *planApiService) RemovePlan(ctx context.Context, request *api.RemovePlan
 	return &api.RemovePlanResponse{}, nil
 }
 
+func (s *planApiService) UpdatePlan(ctx context.Context, request *api.UpdatePlanRequest) (*api.UpdatePlanResponse, error) {
+	span := opentracing.StartSpan("UpdatePlan rpc")
+	defer span.Finish()
+
+	log.Info().
+		Str("call grpc method", "UpdatePlan").
+		Str("request", request.String()).
+		Send()
+
+	err := s.planRepo.UpdateEntity(ctx, request.PlanId, newPlan(request.GetPlan()))
+	if err != nil {
+		return nil, err
+	}
+	return &api.UpdatePlanResponse{}, nil
+}
+
 func mapPlanToProto(plan *models.Plan) *api.Plan {
 	return &api.Plan{
 		PlanId:      plan.Id,
@@ -147,6 +153,16 @@ func mapPlanToProto(plan *models.Plan) *api.Plan {
 		CreatedAt:   timestamppb.New(plan.CreatedAt),
 		DeadlineAt:  timestamppb.New(plan.DeadlineAt),
 	}
+}
+
+func newPlan(planTemplate *api.PlanTemplate) *models.Plan {
+	return models.NewPlan(
+		0,
+		planTemplate.UserId,
+		planTemplate.Title,
+		planTemplate.Description,
+		time.Now(),
+		planTemplate.DeadlineAt.AsTime())
 }
 
 func New(planRepo *repo.PlanRepo, flusher *planFlusher.Flusher) api.PlanApiServer {

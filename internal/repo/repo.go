@@ -16,6 +16,7 @@ type PlanRepo interface {
 	ListEntities(ctx context.Context, limit, offset uint64) ([]models.Plan, error)
 	DescribeEntity(ctx context.Context, entityId uint64) (*models.Plan, error)
 	RemoveEntity(ctx context.Context, entityId uint64) error
+	UpdateEntity(ctx context.Context, entityId uint64, entity *models.Plan) error
 }
 
 type planRepo struct {
@@ -132,6 +133,20 @@ func (p *planRepo) RemoveEntity(ctx context.Context, entityId uint64) error {
 		Where(squirrel.Eq{"id": entityId}).
 		PlaceholderFormat(squirrel.Dollar).
 		ExecContext(ctx)
+	return err
+}
+
+func (p *planRepo) UpdateEntity(ctx context.Context, entityId uint64, entity *models.Plan) error {
+	_, err := squirrel.Update("plans").
+		Set("user_id", entity.UserId).
+		Set("title", entity.Title).
+		Set("description", entity.Description).
+		Set("deadline_at", entity.DeadlineAt).
+		Where(squirrel.Eq{"id": entityId}).
+		RunWith(p.db).
+		PlaceholderFormat(squirrel.Dollar).
+		ExecContext(ctx)
+
 	return err
 }
 
