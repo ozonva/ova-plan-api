@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/Masterminds/squirrel"
@@ -10,18 +11,18 @@ import (
 
 // PlanRepo - interface for storage Plan entities
 type PlanRepo interface {
-	AddEntity(entity *models.Plan) (uint64, error)
-	AddEntities(entities []models.Plan) error
-	ListEntities(limit, offset uint64) ([]models.Plan, error)
-	DescribeEntity(entityId uint64) (*models.Plan, error)
-	RemoveEntity(entityId uint64) error
+	AddEntity(ctx context.Context, entity *models.Plan) (uint64, error)
+	AddEntities(ctx context.Context, entities []models.Plan) error
+	ListEntities(ctx context.Context, limit, offset uint64) ([]models.Plan, error)
+	DescribeEntity(ctx context.Context, entityId uint64) (*models.Plan, error)
+	RemoveEntity(ctx context.Context, entityId uint64) error
 }
 
 type planRepo struct {
 	db *sqlx.DB
 }
 
-func (p *planRepo) AddEntity(entity *models.Plan) (uint64, error) {
+func (p *planRepo) AddEntity(ctx context.Context, entity *models.Plan) (uint64, error) {
 	query := squirrel.Insert("plans").
 		Columns("user_id", "title", "description", "created_at", "deadline_at").
 		Values(entity.UserId, entity.Title, entity.Description, entity.CreatedAt, entity.DeadlineAt).
@@ -30,14 +31,14 @@ func (p *planRepo) AddEntity(entity *models.Plan) (uint64, error) {
 		PlaceholderFormat(squirrel.Dollar)
 
 	var id uint64
-	err := query.Scan(&id)
+	err := query.ScanContext(ctx, &id)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (p *planRepo) AddEntities(entities []models.Plan) error {
+func (p *planRepo) AddEntities(ctx context.Context, entities []models.Plan) error {
 	query := squirrel.Insert("plans").
 		Columns("user_id", "title", "description", "created_at", "deadline_at").
 		RunWith(p.db).
@@ -47,7 +48,7 @@ func (p *planRepo) AddEntities(entities []models.Plan) error {
 		query = query.Values(entity.UserId, entity.Title, entity.Description, entity.CreatedAt, entity.DeadlineAt)
 	}
 
-	_, err := query.Exec()
+	_, err := query.ExecContext(ctx)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (p *planRepo) AddEntities(entities []models.Plan) error {
 	return nil
 }
 
-func (p *planRepo) ListEntities(limit, offset uint64) ([]models.Plan, error) {
+func (p *planRepo) ListEntities(ctx context.Context, limit, offset uint64) ([]models.Plan, error) {
 	query := squirrel.Select("id", "user_id", "title", "description", "created_at", "deadline_at").
 		From("plans").
 		Limit(limit).
@@ -64,7 +65,7 @@ func (p *planRepo) ListEntities(limit, offset uint64) ([]models.Plan, error) {
 		RunWith(p.db).
 		PlaceholderFormat(squirrel.Dollar)
 
-	rows, err := query.Query()
+	rows, err := query.QueryContext(ctx)
 
 	if err != nil {
 		return nil, err
@@ -100,14 +101,14 @@ func readRow(rows *sql.Rows) (*models.Plan, error) {
 	return plan, nil
 }
 
-func (p *planRepo) DescribeEntity(entityId uint64) (*models.Plan, error) {
+func (p *planRepo) DescribeEntity(ctx context.Context, entityId uint64) (*models.Plan, error) {
 	query := squirrel.Select("id", "user_id", "title", "description", "created_at", "deadline_at").
 		From("plans").
 		Where(squirrel.Eq{"id": entityId}).
 		RunWith(p.db).
 		PlaceholderFormat(squirrel.Dollar)
 
-	rows, err := query.Query()
+	rows, err := query.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -125,12 +126,12 @@ func (p *planRepo) DescribeEntity(entityId uint64) (*models.Plan, error) {
 	return plan, nil
 }
 
-func (p *planRepo) RemoveEntity(entityId uint64) error {
+func (p *planRepo) RemoveEntity(ctx context.Context, entityId uint64) error {
 	_, err := squirrel.Delete("plans").
 		RunWith(p.db).
 		Where(squirrel.Eq{"id": entityId}).
 		PlaceholderFormat(squirrel.Dollar).
-		Exec()
+		ExecContext(ctx)
 	return err
 }
 
