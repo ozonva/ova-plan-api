@@ -12,6 +12,7 @@ import (
 func main() {
 	dbConfig := config.NewEnvVarDatabaseConfig()
 	db, err := database.Connect(dbConfig)
+
 	if err != nil {
 		log.Fatalf("Database connect failed, %v", err.Error())
 	}
