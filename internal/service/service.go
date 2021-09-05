@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/ozonva/ova-plan-api/internal/models"
 	"github.com/ozonva/ova-plan-api/internal/repo"
+	planSaver "github.com/ozonva/ova-plan-api/internal/saver"
 	api "github.com/ozonva/ova-plan-api/pkg/ova-plan-api/github.com/ozonva/ova-plan-api/pkg/ova-plan-api"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -14,6 +15,7 @@ import (
 type planApiService struct {
 	api.UnimplementedPlanApiServer
 	planRepo repo.PlanRepo
+	saver    planSaver.Saver
 }
 
 func (s *planApiService) CreatePlan(ctx context.Context, request *api.CreatePlanRequest) (*api.CreatePlanResponse, error) {
@@ -22,18 +24,36 @@ func (s *planApiService) CreatePlan(ctx context.Context, request *api.CreatePlan
 		Str("request", request.String()).
 		Send()
 
-	id, err := s.planRepo.AddEntity(models.NewPlan(
-		0,
-		request.Plan.UserId,
-		request.Plan.Title,
-		request.Plan.Description,
-		time.Now(),
-		request.Plan.DeadlineAt.AsTime()))
+	id, err := s.planRepo.AddEntity(newPlan(request.Plan))
 	if err != nil {
 		return nil, err
 	}
 
 	return &api.CreatePlanResponse{PlanId: id}, nil
+}
+
+func (s *planApiService) MultiCreatePlan(ctx context.Context, request *api.MultiCreatePlanRequest) (*api.MultiCreatePlanResponse, error) {
+	log.Info().
+		Str("call grpc method", "MultiCreatePlan").
+		Str("request", request.String()).
+		Send()
+
+	for _, plan := range request.GetPlans() {
+		planModel := newPlan(plan)
+		s.saver.Save(*planModel)
+	}
+
+	return &api.MultiCreatePlanResponse{}, nil
+}
+
+func newPlan(planTemplate *api.PlanTemplate) *models.Plan {
+	return models.NewPlan(
+		0,
+		planTemplate.UserId,
+		planTemplate.Title,
+		planTemplate.Description,
+		time.Now(),
+		planTemplate.DeadlineAt.AsTime())
 }
 
 func (s *planApiService) DescribePlan(ctx context.Context, request *api.DescribePlanRequest) (*api.DescribePlanResponse, error) {
@@ -109,6 +129,6 @@ func mapPlanToProto(plan *models.Plan) *api.Plan {
 	}
 }
 
-func New(planRepo *repo.PlanRepo) api.PlanApiServer {
-	return &planApiService{planRepo: *planRepo}
+func New(planRepo *repo.PlanRepo, saver *planSaver.Saver) api.PlanApiServer {
+	return &planApiService{planRepo: *planRepo, saver: *saver}
 }

@@ -22,6 +22,7 @@ type PlanApiClient interface {
 	DescribePlan(ctx context.Context, in *DescribePlanRequest, opts ...grpc.CallOption) (*DescribePlanResponse, error)
 	ListPlans(ctx context.Context, in *ListPlansRequest, opts ...grpc.CallOption) (*ListPlansResponse, error)
 	RemovePlan(ctx context.Context, in *RemovePlanRequest, opts ...grpc.CallOption) (*RemovePlanResponse, error)
+	MultiCreatePlan(ctx context.Context, in *MultiCreatePlanRequest, opts ...grpc.CallOption) (*MultiCreatePlanResponse, error)
 }
 
 type planApiClient struct {
@@ -68,6 +69,15 @@ func (c *planApiClient) RemovePlan(ctx context.Context, in *RemovePlanRequest, o
 	return out, nil
 }
 
+func (c *planApiClient) MultiCreatePlan(ctx context.Context, in *MultiCreatePlanRequest, opts ...grpc.CallOption) (*MultiCreatePlanResponse, error) {
+	out := new(MultiCreatePlanResponse)
+	err := c.cc.Invoke(ctx, "/ova.plan.api.PlanApi/MultiCreatePlan", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlanApiServer is the server API for PlanApi service.
 // All implementations must embed UnimplementedPlanApiServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type PlanApiServer interface {
 	DescribePlan(context.Context, *DescribePlanRequest) (*DescribePlanResponse, error)
 	ListPlans(context.Context, *ListPlansRequest) (*ListPlansResponse, error)
 	RemovePlan(context.Context, *RemovePlanRequest) (*RemovePlanResponse, error)
+	MultiCreatePlan(context.Context, *MultiCreatePlanRequest) (*MultiCreatePlanResponse, error)
 	mustEmbedUnimplementedPlanApiServer()
 }
 
@@ -94,6 +105,9 @@ func (UnimplementedPlanApiServer) ListPlans(context.Context, *ListPlansRequest) 
 }
 func (UnimplementedPlanApiServer) RemovePlan(context.Context, *RemovePlanRequest) (*RemovePlanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePlan not implemented")
+}
+func (UnimplementedPlanApiServer) MultiCreatePlan(context.Context, *MultiCreatePlanRequest) (*MultiCreatePlanResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreatePlan not implemented")
 }
 func (UnimplementedPlanApiServer) mustEmbedUnimplementedPlanApiServer() {}
 
@@ -180,6 +194,24 @@ func _PlanApi_RemovePlan_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlanApi_MultiCreatePlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreatePlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlanApiServer).MultiCreatePlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.plan.api.PlanApi/MultiCreatePlan",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlanApiServer).MultiCreatePlan(ctx, req.(*MultiCreatePlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlanApi_ServiceDesc is the grpc.ServiceDesc for PlanApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +234,10 @@ var PlanApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemovePlan",
 			Handler:    _PlanApi_RemovePlan_Handler,
+		},
+		{
+			MethodName: "MultiCreatePlan",
+			Handler:    _PlanApi_MultiCreatePlan_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

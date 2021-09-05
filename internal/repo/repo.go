@@ -39,12 +39,12 @@ func (p *planRepo) AddEntity(entity *models.Plan) (uint64, error) {
 
 func (p *planRepo) AddEntities(entities []models.Plan) error {
 	query := squirrel.Insert("plans").
-		Columns("id", "user_id", "title", "description", "created_at", "deadline_at").
+		Columns("user_id", "title", "description", "created_at", "deadline_at").
 		RunWith(p.db).
 		PlaceholderFormat(squirrel.Dollar)
 
 	for _, entity := range entities {
-		query.Values(entity.Id, entity.UserId, entity.Title, entity.Description, entity.CreatedAt, entity.DeadlineAt)
+		query = query.Values(entity.UserId, entity.Title, entity.Description, entity.CreatedAt, entity.DeadlineAt)
 	}
 
 	_, err := query.Exec()

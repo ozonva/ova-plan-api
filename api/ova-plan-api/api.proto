@@ -11,6 +11,7 @@ service PlanApi {
   rpc DescribePlan(DescribePlanRequest) returns (DescribePlanResponse) {}
   rpc ListPlans(ListPlansRequest) returns (ListPlansResponse) {}
   rpc RemovePlan(RemovePlanRequest) returns (RemovePlanResponse) {}
+  rpc MultiCreatePlan(MultiCreatePlanRequest) returns (MultiCreatePlanResponse) {}
 }
 
 message Plan {
@@ -63,4 +64,11 @@ message RemovePlanRequest {
 
 message RemovePlanResponse {
   string error = 1;
+}
+
+message MultiCreatePlanRequest{
+  repeated PlanTemplate plans = 1;
+}
+
+message MultiCreatePlanResponse{
 }
