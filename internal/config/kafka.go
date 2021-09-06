@@ -1,13 +1,16 @@
 package config
 
-type constKafkaConfig struct {
+import "os"
+
+type envVarKafkaConfig struct {
 }
 
-func (c *constKafkaConfig) GetBrokers() []string {
-	return []string{"127.0.0.1:9092"}
+func (c *envVarKafkaConfig) GetBrokers() []string {
+	broker := os.Getenv("OVA_KAFKA_BROKER")
+
+	return []string{broker}
 }
 
-// TODO: Use config
-func NewKafkaConfig() *constKafkaConfig {
-	return &constKafkaConfig{}
+func NewKafkaConfig() KafkaConfig {
+	return &envVarKafkaConfig{}
 }

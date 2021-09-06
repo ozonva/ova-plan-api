@@ -18,6 +18,6 @@ func (e *envVarDatabaseConfig) GetDsn() string {
 	return fmt.Sprintf("postgresql://%v:%v@%v:%v/%v?sslmode=disable", user, password, host, port, dbName)
 }
 
-func NewEnvVarDatabaseConfig() *envVarDatabaseConfig {
+func NewEnvVarDatabaseConfig() DatabaseConfig {
 	return &envVarDatabaseConfig{}
 }
