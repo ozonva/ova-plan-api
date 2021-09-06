@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/opentracing/opentracing-go"
 	planFlusher "github.com/ozonva/ova-plan-api/internal/flusher"
+	"github.com/ozonva/ova-plan-api/internal/kafka"
 	"github.com/ozonva/ova-plan-api/internal/models"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/utils/tracing"
@@ -16,8 +17,9 @@ import (
 // implements PlanApiServer
 type planApiService struct {
 	api.UnimplementedPlanApiServer
-	planRepo repo.PlanRepo
-	flusher  planFlusher.Flusher
+	planRepo      repo.PlanRepo
+	flusher       planFlusher.Flusher
+	kafkaProducer kafka.Producer
 }
 
 func (s *planApiService) CreatePlan(ctx context.Context, request *api.CreatePlanRequest) (*api.CreatePlanResponse, error) {
@@ -29,7 +31,16 @@ func (s *planApiService) CreatePlan(ctx context.Context, request *api.CreatePlan
 		Str("request", request.String()).
 		Send()
 
-	id, err := s.planRepo.AddEntity(tracing.CtxWithParentSpan(ctx, span), newPlan(request.Plan))
+	plan := newPlan(request.Plan)
+	id, err := s.planRepo.AddEntity(tracing.CtxWithParentSpan(ctx, span), plan)
+	if err != nil {
+		return nil, err
+	}
+	msgs, err := kafka.NewCreatePlanMessages([]models.Plan{*plan})
+	if err != nil {
+		return nil, err
+	}
+	err = s.kafkaProducer.Send(msgs)
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +64,15 @@ func (s *planApiService) MultiCreatePlan(ctx context.Context, request *api.Multi
 	}
 
 	s.flusher.Flush(tracing.CtxWithParentSpan(ctx, span), planModels)
+
+	msgs, err := kafka.NewCreatePlanMessages(planModels)
+	if err != nil {
+		return nil, err
+	}
+	err = s.kafkaProducer.Send(msgs)
+	if err != nil {
+		return nil, err
+	}
 
 	return &api.MultiCreatePlanResponse{}, nil
 }
@@ -125,6 +145,15 @@ func (s *planApiService) RemovePlan(ctx context.Context, request *api.RemovePlan
 		return &api.RemovePlanResponse{Error: err.Error()}, nil
 	}
 
+	msgs, err := kafka.NewRemovePlanMessages([]uint64{request.PlanId})
+	if err != nil {
+		return nil, err
+	}
+	err = s.kafkaProducer.Send(msgs)
+	if err != nil {
+		return nil, err
+	}
+
 	return &api.RemovePlanResponse{}, nil
 }
 
@@ -137,7 +166,17 @@ func (s *planApiService) UpdatePlan(ctx context.Context, request *api.UpdatePlan
 		Str("request", request.String()).
 		Send()
 
-	err := s.planRepo.UpdateEntity(ctx, request.PlanId, newPlan(request.GetPlan()))
+	plan := newPlan(request.GetPlan())
+	err := s.planRepo.UpdateEntity(ctx, request.PlanId, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	msgs, err := kafka.NewUpdatePlanMessages([]models.Plan{*plan})
+	if err != nil {
+		return nil, err
+	}
+	err = s.kafkaProducer.Send(msgs)
 	if err != nil {
 		return nil, err
 	}
@@ -165,6 +204,6 @@ func newPlan(planTemplate *api.PlanTemplate) *models.Plan {
 		planTemplate.DeadlineAt.AsTime())
 }
 
-func New(planRepo *repo.PlanRepo, flusher *planFlusher.Flusher) api.PlanApiServer {
-	return &planApiService{planRepo: *planRepo, flusher: *flusher}
+func New(planRepo *repo.PlanRepo, flusher *planFlusher.Flusher, kafkaProducer *kafka.Producer) api.PlanApiServer {
+	return &planApiService{planRepo: *planRepo, flusher: *flusher, kafkaProducer: *kafkaProducer}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/ozonva/ova-plan-api/internal/config"
 	database "github.com/ozonva/ova-plan-api/internal/db"
 	"github.com/ozonva/ova-plan-api/internal/flusher"
+	"github.com/ozonva/ova-plan-api/internal/kafka"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/server"
 	"github.com/ozonva/ova-plan-api/internal/service"
@@ -17,10 +18,16 @@ import (
 )
 
 func main() {
+	//TRACER
 	tracer, traceCloser := initTracer()
 	opentracing.SetGlobalTracer(tracer)
 	defer traceCloser.Close()
 
+	//KAFKA
+	kafkaConfig := config.NewKafkaConfig()
+	kafkaProducer := kafka.NewSyncProducer(kafkaConfig)
+
+	//DB
 	dbConfig := config.NewEnvVarDatabaseConfig()
 	db, err := database.Connect(dbConfig)
 
@@ -29,12 +36,13 @@ func main() {
 	}
 	defer db.Close()
 
+	//APP
 	planRepo := repo.New(db)
 	planFlusher := flusher.NewFlusher(2, planRepo)
 	if err != nil {
 		log.Fatal().Msgf("Can't create new plan flusher, %v", err.Error())
 	}
-	planApiService := service.New(&planRepo, &planFlusher)
+	planApiService := service.New(&planRepo, &planFlusher, &kafkaProducer)
 	grpcServer := server.New(&planApiService)
 
 	err = grpcServer.Run(":8080")
@@ -43,6 +51,7 @@ func main() {
 	}
 }
 
+// TODO: move to module
 func initTracer() (opentracing.Tracer, io.Closer) {
 	cfg := jaegercfg.Configuration{
 		ServiceName: "ova-plan-api",
