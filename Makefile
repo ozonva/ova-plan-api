@@ -1,5 +1,3 @@
-LOCAL_BIN:=$(CURDIR)/bin
-
 build:
 	go build -o bin/ova-plan-api ./cmd/ova-plan-api/main.go
 
@@ -7,7 +5,10 @@ run:
 	go run ./cmd/ova-plan-api/main.go
 
 test:
-	go test ./... -v
+	go test ./...
+
+test-integration:
+	go test --tags=integration -count 1 ./integration_test/...
 
 generate:
 	go generate -v -x ./internal/mockgen.go
@@ -17,6 +18,9 @@ proto:
 
 migrations-run:
 	goose -dir=migrations postgres "postgresql://${OVA_PLAN_DB_USER}:${OVA_PLAN_DB_PASSWORD}@${OVA_PLAN_DB_HOST}:${OVA_PLAN_DB_PORT}/${OVA_PLAN_DB_NAME}?sslmode=disable" up
+
+run-with-infra:
+	docker compose up
 
 deps: .install-go-deps
 
