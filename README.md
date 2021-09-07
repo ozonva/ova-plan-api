@@ -4,8 +4,9 @@ An application to store plans
 
 ## How to run
 
-To run application just execute
-```make run-with-infra```
+1. Copy `.env.template` file to `.env` and fill and fill in other values if necessary.
+2. To run application just execute  
+   ```make run-with-infra```
 
 For other options see Makefile
 
