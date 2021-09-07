@@ -25,8 +25,13 @@ func (p *syncProducer) Send(messages Messages) error {
 			Value:     sarama.ByteEncoder(message.GetEncoded()),
 		})
 	}
-	err := p.producer.SendMessages(kafkaMsgs)
-	return err
+	errs := p.producer.SendMessages(kafkaMsgs)
+	if errs != nil {
+		for _, err := range errs.(sarama.ProducerErrors) {
+			log.Println("Write to kafka failed: ", err)
+		}
+	}
+	return errs
 }
 
 func (p *syncProducer) Close() error {

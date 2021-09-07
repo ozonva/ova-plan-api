@@ -5,6 +5,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	planFlusher "github.com/ozonva/ova-plan-api/internal/flusher"
 	"github.com/ozonva/ova-plan-api/internal/kafka"
+	"github.com/ozonva/ova-plan-api/internal/metrics"
 	"github.com/ozonva/ova-plan-api/internal/models"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/utils/tracing"
@@ -45,6 +46,8 @@ func (s *planApiService) CreatePlan(ctx context.Context, request *api.CreatePlan
 		return nil, err
 	}
 
+	metrics.AddCreatePlanSucceeds(1)
+
 	return &api.CreatePlanResponse{PlanId: id}, nil
 }
 
@@ -63,7 +66,7 @@ func (s *planApiService) MultiCreatePlan(ctx context.Context, request *api.Multi
 		planModels = append(planModels, *newPlan(plan))
 	}
 
-	s.flusher.Flush(tracing.CtxWithParentSpan(ctx, span), planModels)
+	notCreated := s.flusher.Flush(tracing.CtxWithParentSpan(ctx, span), planModels)
 
 	msgs, err := kafka.NewCreatePlanMessages(planModels)
 	if err != nil {
@@ -73,6 +76,8 @@ func (s *planApiService) MultiCreatePlan(ctx context.Context, request *api.Multi
 	if err != nil {
 		return nil, err
 	}
+
+	metrics.AddCreatePlanSucceeds(len(request.GetPlans()) - len(notCreated))
 
 	return &api.MultiCreatePlanResponse{}, nil
 }
@@ -154,6 +159,8 @@ func (s *planApiService) RemovePlan(ctx context.Context, request *api.RemovePlan
 		return nil, err
 	}
 
+	metrics.AddRemovePlanSucceeds(1)
+
 	return &api.RemovePlanResponse{}, nil
 }
 
@@ -180,6 +187,9 @@ func (s *planApiService) UpdatePlan(ctx context.Context, request *api.UpdatePlan
 	if err != nil {
 		return nil, err
 	}
+
+	metrics.AddUpdatePlanSucceeds(1)
+
 	return &api.UpdatePlanResponse{}, nil
 }
 

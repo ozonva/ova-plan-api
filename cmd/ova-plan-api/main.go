@@ -6,6 +6,7 @@ import (
 	database "github.com/ozonva/ova-plan-api/internal/db"
 	"github.com/ozonva/ova-plan-api/internal/flusher"
 	"github.com/ozonva/ova-plan-api/internal/kafka"
+	mtrx "github.com/ozonva/ova-plan-api/internal/metrics"
 	"github.com/ozonva/ova-plan-api/internal/repo"
 	"github.com/ozonva/ova-plan-api/internal/server"
 	"github.com/ozonva/ova-plan-api/internal/service"
@@ -31,6 +32,9 @@ func main() {
 	dbConfig := config.NewEnvVarDatabaseConfig()
 	db, err := database.Connect(dbConfig)
 
+	//metrics
+	mtrx.RunServer()
+
 	if err != nil {
 		log.Fatal().Msgf("Database connect failed, %v", err.Error())
 	}
@@ -39,9 +43,6 @@ func main() {
 	//APP
 	planRepo := repo.New(db)
 	planFlusher := flusher.NewFlusher(2, planRepo)
-	if err != nil {
-		log.Fatal().Msgf("Can't create new plan flusher, %v", err.Error())
-	}
 	planApiService := service.New(&planRepo, &planFlusher, &kafkaProducer)
 	grpcServer := server.New(&planApiService)
 
