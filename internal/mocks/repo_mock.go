@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,45 +36,88 @@ func (m *MockPlanRepo) EXPECT() *MockPlanRepoMockRecorder {
 }
 
 // AddEntities mocks base method.
-func (m *MockPlanRepo) AddEntities(arg0 []models.Plan) error {
+func (m *MockPlanRepo) AddEntities(arg0 context.Context, arg1 []models.Plan) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddEntities", arg0)
+	ret := m.ctrl.Call(m, "AddEntities", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddEntities indicates an expected call of AddEntities.
-func (mr *MockPlanRepoMockRecorder) AddEntities(arg0 interface{}) *gomock.Call {
+func (mr *MockPlanRepoMockRecorder) AddEntities(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEntities", reflect.TypeOf((*MockPlanRepo)(nil).AddEntities), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEntities", reflect.TypeOf((*MockPlanRepo)(nil).AddEntities), arg0, arg1)
+}
+
+// AddEntity mocks base method.
+func (m *MockPlanRepo) AddEntity(arg0 context.Context, arg1 *models.Plan) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddEntity", arg0, arg1)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddEntity indicates an expected call of AddEntity.
+func (mr *MockPlanRepoMockRecorder) AddEntity(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEntity", reflect.TypeOf((*MockPlanRepo)(nil).AddEntity), arg0, arg1)
 }
 
 // DescribeEntity mocks base method.
-func (m *MockPlanRepo) DescribeEntity(arg0 uint64) (*models.Plan, error) {
+func (m *MockPlanRepo) DescribeEntity(arg0 context.Context, arg1 uint64) (*models.Plan, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DescribeEntity", arg0)
+	ret := m.ctrl.Call(m, "DescribeEntity", arg0, arg1)
 	ret0, _ := ret[0].(*models.Plan)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // DescribeEntity indicates an expected call of DescribeEntity.
-func (mr *MockPlanRepoMockRecorder) DescribeEntity(arg0 interface{}) *gomock.Call {
+func (mr *MockPlanRepoMockRecorder) DescribeEntity(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeEntity", reflect.TypeOf((*MockPlanRepo)(nil).DescribeEntity), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeEntity", reflect.TypeOf((*MockPlanRepo)(nil).DescribeEntity), arg0, arg1)
 }
 
 // ListEntities mocks base method.
-func (m *MockPlanRepo) ListEntities(arg0, arg1 uint64) ([]models.Plan, error) {
+func (m *MockPlanRepo) ListEntities(arg0 context.Context, arg1, arg2 uint64) ([]models.Plan, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListEntities", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListEntities", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]models.Plan)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListEntities indicates an expected call of ListEntities.
-func (mr *MockPlanRepoMockRecorder) ListEntities(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockPlanRepoMockRecorder) ListEntities(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntities", reflect.TypeOf((*MockPlanRepo)(nil).ListEntities), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntities", reflect.TypeOf((*MockPlanRepo)(nil).ListEntities), arg0, arg1, arg2)
+}
+
+// RemoveEntity mocks base method.
+func (m *MockPlanRepo) RemoveEntity(arg0 context.Context, arg1 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveEntity", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveEntity indicates an expected call of RemoveEntity.
+func (mr *MockPlanRepoMockRecorder) RemoveEntity(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveEntity", reflect.TypeOf((*MockPlanRepo)(nil).RemoveEntity), arg0, arg1)
+}
+
+// UpdateEntity mocks base method.
+func (m *MockPlanRepo) UpdateEntity(arg0 context.Context, arg1 uint64, arg2 *models.Plan) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateEntity", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateEntity indicates an expected call of UpdateEntity.
+func (mr *MockPlanRepoMockRecorder) UpdateEntity(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateEntity", reflect.TypeOf((*MockPlanRepo)(nil).UpdateEntity), arg0, arg1, arg2)
 }

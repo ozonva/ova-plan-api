@@ -1,6 +1,7 @@
 package flusher_test
 
 import (
+	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -27,10 +28,12 @@ var _ = Describe("Flusher", func() {
 			testPlan(4),
 			testPlan(5),
 		}
-		fl flusher.Flusher
+		fl  flusher.Flusher
+		ctx context.Context
 	)
 
 	BeforeEach(func() {
+		ctx = context.TODO()
 		ctrl = gomock.NewController(GinkgoT())
 		mockRepo = mocks.NewMockPlanRepo(ctrl)
 	})
@@ -48,28 +51,28 @@ var _ = Describe("Flusher", func() {
 			chunkSize = 3
 		})
 		It("Should works without errors when repo works good", func() {
-			mockRepo.EXPECT().AddEntities(testData[0:3]).Return(nil).Times(1)
-			mockRepo.EXPECT().AddEntities(testData[3:5]).Return(nil).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[0:3]).Return(nil).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[3:5]).Return(nil).Times(1)
 
-			notSaved := fl.Flush(testData)
+			notSaved := fl.Flush(ctx, testData)
 
 			Expect(notSaved).Should(BeNil())
 		})
 
 		It("Should return back values at which error occurred", func() {
-			mockRepo.EXPECT().AddEntities(testData[0:3]).Return(simpleError).Times(1)
-			mockRepo.EXPECT().AddEntities(testData[3:5]).Return(nil).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[0:3]).Return(simpleError).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[3:5]).Return(nil).Times(1)
 
-			notSaved := fl.Flush(testData)
+			notSaved := fl.Flush(ctx, testData)
 
 			Expect(notSaved).Should(Equal(testData[0:3]))
 		})
 
 		It("Should return back all values when all add entities in repo failed", func() {
-			mockRepo.EXPECT().AddEntities(testData[0:3]).Return(simpleError).Times(1)
-			mockRepo.EXPECT().AddEntities(testData[3:5]).Return(simpleError).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[0:3]).Return(simpleError).Times(1)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), testData[3:5]).Return(simpleError).Times(1)
 
-			notSaved := fl.Flush(testData)
+			notSaved := fl.Flush(ctx, testData)
 
 			Expect(notSaved).Should(Equal(testData))
 		})
@@ -81,8 +84,8 @@ var _ = Describe("Flusher", func() {
 		})
 		It("Should works with errors", func() {
 			fl := flusher.NewFlusher(chunkSize, mockRepo)
-			mockRepo.EXPECT().AddEntities(gomock.Any()).Times(0)
-			notSaved := fl.Flush(testData)
+			mockRepo.EXPECT().AddEntities(gomock.Any(), gomock.Any()).Times(0)
+			notSaved := fl.Flush(ctx, testData)
 			Expect(notSaved).To(Equal(testData))
 		})
 	})

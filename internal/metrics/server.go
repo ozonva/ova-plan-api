@@ -15,6 +15,6 @@ func RunServer() {
 		if err := http.ListenAndServe(metricsServerAddress, nil); err != nil {
 			log.Fatal().Err(err).Msgf("An error occured on starting prometheus server, %s", err)
 		}
-		log.Info().Msgf("metrics server started on %", metricsServerAddress)
+		log.Info().Msgf("metrics server started on %s", metricsServerAddress)
 	}()
 }
