@@ -1,13 +1,14 @@
-LOCAL_BIN:=$(CURDIR)/bin
-
 build:
-	go build -o ./bin/ ./cmd/ova-plan-api/
+	go build -o bin/ova-plan-api ./cmd/ova-plan-api/main.go
 
 run:
-	go run ./cmd/ova-plan-api/
+	go run ./cmd/ova-plan-api/main.go
 
 test:
-	go test ./... -v
+	go test ./...
+
+test-integration:
+	go test --tags=integration -count 1 ./integration_test/...
 
 generate:
 	go generate -v -x ./internal/mockgen.go
@@ -17,6 +18,9 @@ proto:
 
 migrations-run:
 	goose -dir=migrations postgres "postgresql://${OVA_PLAN_DB_USER}:${OVA_PLAN_DB_PASSWORD}@${OVA_PLAN_DB_HOST}:${OVA_PLAN_DB_PORT}/${OVA_PLAN_DB_NAME}?sslmode=disable" up
+
+run-with-infra:
+	docker compose up
 
 deps: .install-go-deps
 
@@ -30,3 +34,10 @@ deps: .install-go-deps
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 	go get -u github.com/pressly/goose/v3/cmd/goose
+	go get -u github.com/onsi/ginkgo@v1.16.4
+	go get -u github.com/onsi/gomega@v1.16.0
+	go get -u github.com/golang/mock@v1.6.0
+	go get -u github.com/rs/zerolog/log@v1.23.0
+	go get -d github.com/pressly/goose/v3/cmd/goose@v3.1.0
+
+prepare: build

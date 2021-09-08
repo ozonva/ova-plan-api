@@ -1,6 +1,7 @@
 package saver
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/ozonva/ova-plan-api/internal/flusher"
@@ -24,6 +25,7 @@ type Saver interface {
 //  it starts goroutine which flushing entities added by Save function with flushInterval period.
 //  For stop call Close method
 func NewSaver(
+	ctx context.Context,
 	capacity uint,
 	flusher flusher.Flusher,
 	flushInterval time.Duration,
@@ -33,6 +35,7 @@ func NewSaver(
 		buffer:            make([]models.Plan, 0, capacity),
 		loopTerminateChan: make(chan struct{}),
 		Mutex:             &sync.Mutex{},
+		ctx:               ctx,
 	}
 
 	if flushInterval < 1 {
@@ -58,6 +61,7 @@ type saver struct {
 	loopTerminateChan chan struct{}
 	flusher           flusher.Flusher
 	terminated        bool
+	ctx               context.Context
 }
 
 func (s *saver) Save(entity models.Plan) error {
@@ -120,7 +124,7 @@ func (s *saver) flush() {
 	if len(s.buffer) == 0 {
 		return
 	}
-	failed := s.flusher.Flush(s.buffer)
+	failed := s.flusher.Flush(s.ctx, s.buffer)
 	s.buffer = make([]models.Plan, 0, cap(s.buffer))
 	s.buffer = append(s.buffer, failed...)
 }

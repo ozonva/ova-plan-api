@@ -1,6 +1,7 @@
 package saver_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -27,9 +28,11 @@ var _ = Describe("Saver", func() {
 			testPlan(4),
 			testPlan(5),
 		}
+		ctx context.Context
 	)
 
 	BeforeEach(func() {
+		ctx = context.TODO()
 		mockController = gomock.NewController(GinkgoT())
 		mockFlusher = mocks.NewMockFlusher(mockController)
 	})
@@ -45,18 +48,16 @@ var _ = Describe("Saver", func() {
 		})
 
 		It("Should save one entity in flushing loop", func() {
-			defer GinkgoRecover()
-
 			var wg = &sync.WaitGroup{}
 			wg.Add(1)
 
-			mockFlusher.EXPECT().Flush(testData[:1]).Times(1).
-				DoAndReturn(func(plans []models.Plan) []models.Plan {
+			mockFlusher.EXPECT().Flush(gomock.Any(), gomock.Any()).Times(1).
+				DoAndReturn(func(ctx2 context.Context, plans []models.Plan) []models.Plan {
 					wg.Done()
 					return nil
 				})
 
-			svr, err := saver.NewSaver(capacity, mockFlusher, flushInterval)
+			svr, err := saver.NewSaver(ctx, capacity, mockFlusher, flushInterval)
 			Expect(err).Should(BeNil())
 
 			Expect(svr.Save(testData[0])).Should(BeNil())
@@ -71,18 +72,18 @@ var _ = Describe("Saver", func() {
 
 			var wg = &sync.WaitGroup{}
 			wg.Add(1)
-			mockFlusher.EXPECT().Flush(testData[:2]).Times(1).
-				DoAndReturn(func(plans []models.Plan) []models.Plan {
+			mockFlusher.EXPECT().Flush(gomock.Any(), testData[:2]).Times(1).
+				DoAndReturn(func(ctx2 context.Context, plans []models.Plan) []models.Plan {
 					wg.Done()
 					return nil
 				})
-			mockFlusher.EXPECT().Flush(testData[2:3]).Times(1).
-				DoAndReturn(func(plans []models.Plan) []models.Plan {
+			mockFlusher.EXPECT().Flush(gomock.Any(), testData[2:3]).Times(1).
+				DoAndReturn(func(ctx2 context.Context, plans []models.Plan) []models.Plan {
 					wg.Done()
 					return nil
 				})
 
-			svr, err := saver.NewSaver(capacity, mockFlusher, flushInterval)
+			svr, err := saver.NewSaver(ctx, capacity, mockFlusher, flushInterval)
 			Expect(err).Should(BeNil())
 
 			Expect(svr.Save(testData[0])).Should(BeNil())
@@ -107,9 +108,9 @@ var _ = Describe("Saver", func() {
 		It("Should flush entities on close", func() {
 			defer GinkgoRecover()
 
-			mockFlusher.EXPECT().Flush(testData[:1]).Return(nil).Times(1)
+			mockFlusher.EXPECT().Flush(ctx, testData[:1]).Return(nil).Times(1)
 
-			svr, err := saver.NewSaver(capacity, mockFlusher, flushInterval)
+			svr, err := saver.NewSaver(ctx, capacity, mockFlusher, flushInterval)
 			Expect(err).Should(BeNil())
 
 			Expect(svr.Save(testData[0])).Should(BeNil())
